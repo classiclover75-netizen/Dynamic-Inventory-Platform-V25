@@ -11,6 +11,7 @@ import { resolveChipRender } from '../lib/colorRender';
 import { useOverviewColumnPin } from '../hooks/useOverviewColumnPin';
 import { useSaleColumnRangeSelect } from '../hooks/useSaleColumnRangeSelect';
 import { useSaleColumnSearch } from '../hooks/useSaleColumnSearch';
+import { OverviewColumnResizeHandle } from './OverviewColumnResizeHandle';
 import { Modal, Button, Input } from './ui';
 import { useToast } from './ToastProvider';
 
@@ -435,6 +436,7 @@ export function ActiveSourcesOverviewModal({
     if (id === '__active_source') return 150;
     if (id === '__total_sales') return 120;
     if (id === '__range_sum') return 160;
+    if (saleCols.some((c: any) => c.key === id)) return 240;
     return 150;
   };
   const { pinnedCols, togglePin, pinnedOffsets, lastPinnedColId } = useOverviewColumnPin(initialPinnedCols, onSavePinnedCols, getColWidth, colWidths, isOpen, colIds);
@@ -700,15 +702,15 @@ export function ActiveSourcesOverviewModal({
               <tr>
                 <th className={getHeaderCls('__active_source', "p-2 border text-left bg-purple-50 text-purple-800 relative")} style={getHeaderSty('__active_source', getColWidth('__active_source'))}>
                   <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">📦 {showAllStatuses ? "Active/Retired Sources" : "Active Source"}</div>{renderPinBtn('__active_source')}</div>
-                  <div onMouseDown={(e) => startResize(e, "__active_source")} onDoubleClick={() => resetCol("__active_source")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
+                  <OverviewColumnResizeHandle colId="__active_source" width={getColWidth('__active_source')} startResize={startResize} resetCol={resetCol} columnName="Active Source" />
                 </th>
                 <th className={getHeaderCls('__total_sales', "p-2 border text-left bg-blue-50 text-blue-800 relative")} style={getHeaderSty('__total_sales', getColWidth('__total_sales'))}>
                   <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">📈 Total Sales</div>{renderPinBtn('__total_sales')}</div>
-                  <div onMouseDown={(e) => startResize(e, "__total_sales")} onDoubleClick={() => resetCol("__total_sales")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
+                  <OverviewColumnResizeHandle colId="__total_sales" width={getColWidth('__total_sales')} startResize={startResize} resetCol={resetCol} columnName="Total Sales" />
                 </th>
                 <th className={getHeaderCls('__range_sum', "p-2 border text-left bg-blue-50 text-blue-800 relative")} style={getHeaderSty('__range_sum', getColWidth('__range_sum'))}>
                   <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">Total Sale Range Column Sum</div>{renderPinBtn('__range_sum')}</div>
-                  <div onMouseDown={(e) => startResize(e, "__range_sum")} onDoubleClick={() => resetCol("__range_sum")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
+                  <OverviewColumnResizeHandle colId="__range_sum" width={getColWidth('__range_sum')} startResize={startResize} resetCol={resetCol} columnName="Total Sale Range Column Sum" />
                 </th>
                 {sourceColumns.map((c, i) => {
                   const isUncheckedSaleCol = c.type === 'sale_tracker' && !selectedKeys.has(c.key);
@@ -749,7 +751,7 @@ export function ActiveSourcesOverviewModal({
                         })()} {c.locked && "🔒"}
                       </span>
                     </div>{renderPinBtn(c.key)}</div>
-                    <div onMouseDown={(e) => startResize(e, c.key)} onDoubleClick={() => resetCol(c.key)} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
+                    <OverviewColumnResizeHandle colId={c.key} width={getColWidth(c.key)} startResize={startResize} resetCol={resetCol} columnName={c.name} />
                   </th>
                 )})}
               </tr>
