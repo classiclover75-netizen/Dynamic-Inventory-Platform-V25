@@ -614,7 +614,7 @@ export function RetiredSourcesOverviewModal({
                    />
                  </div>
                  {saleEffectiveTerms.length > 0 && (
-                   <div className="px-2.5 py-0.5 text-xs text-gray-500 bg-gray-100 rounded-full whitespace-nowrap">
+                   <div className="px-2.5 py-0.5 text-xs text-blue-900 bg-blue-100 rounded-full whitespace-nowrap">
                      {sourceColumns.filter((c: any) => c.type === 'sale_tracker').length}/{saleCols.length} sale columns
                    </div>
                  )}
