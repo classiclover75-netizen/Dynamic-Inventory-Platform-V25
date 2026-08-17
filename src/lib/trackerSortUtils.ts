@@ -108,15 +108,17 @@ export function filterAndSortTrackerRows({
   }
 
   if (linkedSourcePage && autoSortBySales) {
-    if (resultRows === rows) {
-      resultRows = [...resultRows];
+    if (latestSaleCol) {
+      if (resultRows === rows) {
+        resultRows = [...resultRows];
+      }
+      resultRows.sort((a, b) => {
+        const salesA = getNum(a, a[latestSaleCol]);
+        const salesB = getNum(b, b[latestSaleCol]);
+        const diff = salesB - salesA;
+        return diff !== 0 ? diff : (originalIndices.get(String(a.id)) ?? 0) - (originalIndices.get(String(b.id)) ?? 0);
+      });
     }
-    resultRows.sort((a, b) => {
-      const totalSalesA = saleCols.reduce((sum, c) => sum + getNum(a, a[c.key]), 0);
-      const totalSalesB = saleCols.reduce((sum, c) => sum + getNum(b, b[c.key]), 0);
-      const diff = totalSalesB - totalSalesA;
-      return diff !== 0 ? diff : (originalIndices.get(String(a.id)) ?? 0) - (originalIndices.get(String(b.id)) ?? 0);
-    });
   }
 
   if (trackerQtySort !== "none") {

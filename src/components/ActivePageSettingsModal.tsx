@@ -254,7 +254,7 @@ export const ActivePageSettingsModal = React.memo(({
       {!!pageConfig?.linkedSourcePage && (
         <div className="border border-gray-200 rounded-md p-2.5 bg-gray-50 mb-2.5">
           <label className="flex items-center justify-between gap-2.5 m-0 cursor-pointer">
-            <span className="text-[13px] text-[#37474f] font-bold">Auto-sort rows by total sales (highest first)</span>
+            <span className="text-[13px] text-[#37474f] font-bold">Auto-sort rows by latest sale column (highest first)</span>
             <input 
               type="checkbox" 
               className="scale-125" 
@@ -267,7 +267,7 @@ export const ActivePageSettingsModal = React.memo(({
             />
           </label>
           <div className="mt-2 text-[11px] text-[#78909c] leading-snug">
-            Automatically reorder Live Tracker rows based on the total sale quantities.
+            Automatically reorder Live Tracker rows based on the latest sale column's quantities.
           </div>
         </div>
       )}
