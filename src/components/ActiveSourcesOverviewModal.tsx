@@ -608,7 +608,7 @@ export function ActiveSourcesOverviewModal({
                    <input
                      type="text"
                      className="pl-8 pr-3 py-1.5 border border-gray-300 rounded-md text-sm outline-none focus:border-blue-500 w-64"
-                     placeholder="Search or press enter to save"
+                     placeholder="Search Sale Column"
                      value={saleSearchText}
                      onChange={e => setSaleSearchText(e.target.value)}
                      onKeyDown={e => {
