@@ -636,12 +636,14 @@ export function ActiveSourcesOverviewModal({
                   <div onMouseDown={(e) => startResize(e, "__total_sales")} onDoubleClick={() => resetCol("__total_sales")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                 </th>
                 <th className={getHeaderCls('__range_sum', "p-2 border text-left bg-blue-50 text-blue-800 relative")} style={getHeaderSty('__range_sum', getColWidth('__range_sum'))}>
-                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">∑ Total Sale Range Column Sum</div>{renderPinBtn('__range_sum')}</div>
+                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">Total Sale Range Column Sum</div>{renderPinBtn('__range_sum')}</div>
                   <div onMouseDown={(e) => startResize(e, "__range_sum")} onDoubleClick={() => resetCol("__range_sum")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                 </th>
-                {sourceColumns.map((c, i) => (
+                {sourceColumns.map((c, i) => {
+                  const isUncheckedSaleCol = c.type === 'sale_tracker' && !selectedKeys.has(c.key);
+                  return (
                   <th key={c.key} className={getHeaderCls(c.key, "p-2 border text-left relative")} style={getHeaderSty(c.key, getColWidth(c.key))}>
-                    <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">
+                    <div className="flex items-center justify-between w-full"><div className={`flex items-center gap-1 ${isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5]' : ''}`}>
                       {c.type === 'sale_tracker' && (
                         <input
                           type="checkbox"
@@ -662,7 +664,7 @@ export function ActiveSourcesOverviewModal({
                     </div>{renderPinBtn(c.key)}</div>
                     <div onMouseDown={(e) => startResize(e, c.key)} onDoubleClick={() => resetCol(c.key)} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                   </th>
-                ))}
+                )})}
               </tr>
             </thead>
             <tbody>
