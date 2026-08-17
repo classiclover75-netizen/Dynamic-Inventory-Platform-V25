@@ -645,20 +645,22 @@ export function ActiveSourcesOverviewModal({
                   <th key={c.key} className={getHeaderCls(c.key, "p-2 border text-left relative")} style={getHeaderSty(c.key, getColWidth(c.key))}>
                     <div className="flex items-center justify-between w-full"><div className={`flex items-center gap-1 ${isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5]' : ''}`}>
                       {c.type === 'sale_tracker' && (
-                        <input
-                          type="checkbox"
-                          className="accent-blue-600 w-4 h-4 cursor-pointer mr-1"
-                          checked={selectedKeys.has(c.key)}
-                          onChange={() => {}}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (e.shiftKey) {
-                              selectRange(c.key, orderedSaleColKeys);
-                            } else {
-                              toggle(c.key);
-                            }
-                          }}
-                        />
+                        <span className={`relative inline-flex items-center justify-center w-6 h-6 rounded-full shrink-0 transition-colors cursor-pointer hover:bg-gray-200 mr-1 ${selectedKeys.has(c.key) ? 'bg-blue-100' : ''}`}>
+                          <input
+                            type="checkbox"
+                            className="accent-blue-600 w-4 h-4 cursor-pointer focus:outline-none focus-visible:outline-none"
+                            checked={selectedKeys.has(c.key)}
+                            onChange={() => {}}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (e.shiftKey) {
+                                selectRange(c.key, orderedSaleColKeys);
+                              } else {
+                                toggle(c.key);
+                              }
+                            }}
+                          />
+                        </span>
                       )}
                       {i + 1}. {c.name} {c.locked && "🔒"}
                     </div>{renderPinBtn(c.key)}</div>
