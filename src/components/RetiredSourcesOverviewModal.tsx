@@ -6,9 +6,10 @@ import { Search, FileSpreadsheet } from 'lucide-react';
 import { buildFlatRetiredRows, buildRetiredOverview, FlatRetiredRow } from '../lib/retiredOverviewUtils';
 import { parseMultiSource } from '../lib/appUtils';
 import { isRetired } from '../lib/sourceArchiveUtils';
-import { sortOverviewRows, getStatusCounts, buildMixedFlatRows } from '../lib/overviewEnhancements';
+import { sortOverviewRows, getStatusCounts, buildMixedFlatRows, getSourceNumericValue } from '../lib/overviewEnhancements';
 import { resolveChipRender } from '../lib/colorRender';
 import { useOverviewColumnPin } from '../hooks/useOverviewColumnPin';
+import { useSaleColumnRangeSelect } from '../hooks/useSaleColumnRangeSelect';
 import { Modal, Button, Input } from './ui';
 import { useToast } from './ToastProvider';
 
@@ -56,6 +57,9 @@ export function RetiredSourcesOverviewModal({
 
   const saleCols = useMemo(() => columns.filter((c: any) => c.type === "sale_tracker"), [columns]);
   const [showSaleColumns, setShowSaleColumns] = useState(true);
+
+  const { selectedKeys, toggle, selectRange, clear } = useSaleColumnRangeSelect();
+  const orderedSaleColKeys = useMemo(() => saleCols.map((c: any) => c.key), [saleCols]);
 
   const [colWidths, setColWidths] = useState<Record<string, number>>(initialColWidths);
   const colWidthsRef = React.useRef(colWidths);
@@ -402,11 +406,12 @@ export function RetiredSourcesOverviewModal({
     return getStatusCounts(rows, visibleSourceNames);
   }, [rows, visibleSourceNames]);
 
-  const colIds = ["__retired_source", "__total_sales", ...sourceColumns.map((c: any) => c.key)];
+  const colIds = ["__retired_source", "__total_sales", "__range_sum", ...sourceColumns.map((c: any) => c.key)];
   const getColWidth = (id: string) => {
     if (colWidths[id]) return colWidths[id];
     if (id === '__retired_source') return 150;
     if (id === '__total_sales') return 120;
+    if (id === '__range_sum') return 160;
     return 150;
   };
   const { pinnedCols, togglePin, pinnedOffsets, lastPinnedColId } = useOverviewColumnPin(initialPinnedCols, onSavePinnedCols, getColWidth, colWidths, isOpen, colIds);
@@ -434,7 +439,7 @@ export function RetiredSourcesOverviewModal({
     let pinnedBg = '';
     if (isPinned) {
       if (colId === '__retired_source') pinnedBg = '!bg-purple-100';
-      else if (colId === '__total_sales') pinnedBg = '!bg-blue-100';
+      else if (colId === '__total_sales' || colId === '__range_sum') pinnedBg = '!bg-blue-100';
       else pinnedBg = '!bg-gray-200';
     }
     return `${baseClass} ${isPinned ? 'sticky z-20 ' + pinnedBg : ''} ${isLastPinned ? 'shadow-[4px_0_10px_-4px_rgba(0,0,0,0.15)] border-r-gray-400' : ''}`;
@@ -450,7 +455,7 @@ export function RetiredSourcesOverviewModal({
     let pinnedBg = '';
     if (isPinned) {
       if (colId === '__retired_source') pinnedBg = '!bg-purple-100';
-      else if (colId === '__total_sales') pinnedBg = '!bg-blue-100';
+      else if (colId === '__total_sales' || colId === '__range_sum') pinnedBg = '!bg-blue-100';
       else pinnedBg = '!bg-gray-100';
     }
     return `${baseClass} ${isPinned ? 'sticky z-10 ' + pinnedBg : ''} ${isLastPinned ? 'shadow-[4px_0_10px_-4px_rgba(0,0,0,0.15)] border-r-gray-400' : ''}`;
@@ -562,7 +567,11 @@ export function RetiredSourcesOverviewModal({
                   type="checkbox" 
                   className="accent-blue-600 w-4 h-4 cursor-pointer"
                   checked={showSaleColumns} 
-                  onChange={e => setShowSaleColumns(e.target.checked)} 
+                  onChange={e => {
+                    const checked = e.target.checked;
+                    setShowSaleColumns(checked);
+                    if (!checked) clear();
+                  }} 
                 />
                 Show Sale Columns
              </label>
@@ -626,9 +635,29 @@ export function RetiredSourcesOverviewModal({
                   <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">📈 Total Sales</div>{renderPinBtn('__total_sales')}</div>
                   <div onMouseDown={(e) => startResize(e, "__total_sales")} onDoubleClick={() => resetCol("__total_sales")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                 </th>
+                <th className={getHeaderCls('__range_sum', "p-2 border text-left bg-blue-50 text-blue-800 relative")} style={getHeaderSty('__range_sum', getColWidth('__range_sum'))}>
+                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">∑ Total Sale Range Column Sum</div>{renderPinBtn('__range_sum')}</div>
+                  <div onMouseDown={(e) => startResize(e, "__range_sum")} onDoubleClick={() => resetCol("__range_sum")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
+                </th>
                 {sourceColumns.map((c, i) => (
                   <th key={c.key} className={getHeaderCls(c.key, "p-2 border text-left relative")} style={getHeaderSty(c.key, getColWidth(c.key))}>
                     <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">
+                      {c.type === 'sale_tracker' && (
+                        <input
+                          type="checkbox"
+                          className="accent-blue-600 w-4 h-4 cursor-pointer mr-1"
+                          checked={selectedKeys.has(c.key)}
+                          onChange={() => {}}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (e.shiftKey) {
+                              selectRange(c.key, orderedSaleColKeys);
+                            } else {
+                              toggle(c.key);
+                            }
+                          }}
+                        />
+                      )}
                       {i + 1}. {c.name} {c.locked && "🔒"}
                     </div>{renderPinBtn(c.key)}</div>
                     <div onMouseDown={(e) => startResize(e, c.key)} onDoubleClick={() => resetCol(c.key)} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
@@ -659,6 +688,16 @@ export function RetiredSourcesOverviewModal({
                   </td>
                   <td className={getBodyCls('__total_sales', "p-2 border whitespace-pre-wrap break-words font-bold text-blue-700 bg-blue-50/30")} style={getBodySty('__total_sales', getColWidth('__total_sales'))}>
                     {highlightText(String(row._totalSales), deferredSearchQuery)}
+                  </td>
+                  <td className={getBodyCls('__range_sum', "p-2 border whitespace-pre-wrap break-words font-bold text-blue-700 bg-blue-50/30")} style={getBodySty('__range_sum', getColWidth('__range_sum'))}>
+                    {(() => {
+                      if (selectedKeys.size === 0) return "0";
+                      let sum = 0;
+                      selectedKeys.forEach(key => {
+                        sum += getSourceNumericValue(row, key, row._retiredSourceName, false, columns);
+                      });
+                      return highlightText(String(sum), deferredSearchQuery);
+                    })()}
                   </td>
                   
                   {sourceColumns.map((c: any) => {
@@ -707,7 +746,7 @@ export function RetiredSourcesOverviewModal({
               {filteredRows.length === 0 && (
                 <tr>
                   <td
-                    colSpan={sourceColumns.length + 2}
+                    colSpan={sourceColumns.length + 3}
                     className="p-8 text-center text-gray-500 font-medium"
                   >
                     No retired sources match your criteria.
