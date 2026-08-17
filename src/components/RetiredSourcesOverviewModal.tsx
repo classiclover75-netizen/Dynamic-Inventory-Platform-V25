@@ -714,7 +714,7 @@ export function RetiredSourcesOverviewModal({
                   const isUncheckedSaleCol = c.type === 'sale_tracker' && !selectedKeys.has(c.key);
                   return (
                   <th key={c.key} className={getHeaderCls(c.key, "p-2 border text-left relative")} style={getHeaderSty(c.key, getColWidth(c.key))}>
-                    <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">
+                    <div className="flex items-start justify-between w-full"><div className="flex items-start gap-1 min-w-0">
                       {c.type === 'sale_tracker' && (
                         <span className={`relative inline-flex items-center justify-center w-7 h-7 rounded-full shrink-0 transition-colors cursor-pointer hover:bg-gray-300 mr-1 ${selectedKeys.has(c.key) ? 'bg-blue-100' : ''} ${c.key === anchorKey ? 'ring-2 ring-purple-500' : ''}`}>
                           <input
@@ -733,7 +733,7 @@ export function RetiredSourcesOverviewModal({
                           />
                         </span>
                       )}
-                      <span className={`${isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5] ' : ''}truncate`}>
+                      <span className={`${isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5] ' : ''}break-words whitespace-normal`}>
                         {i + 1}. {(() => {
                           if (c.type !== 'sale_tracker' || saleEffectiveTerms.length === 0) return c.name;
                           const escapedTerms = saleEffectiveTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
