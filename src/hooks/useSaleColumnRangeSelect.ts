@@ -5,36 +5,53 @@ export function useSaleColumnRangeSelect() {
   const [anchorKey, setAnchorKey] = useState<string | null>(null);
 
   const toggle = useCallback((key: string) => {
+    setAnchorKey(key);
     setSelectedKeys(prev => {
-      if (prev.size === 1 && prev.has(key)) {
-        setAnchorKey(null);
-        return new Set();
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
       }
-      setAnchorKey(key);
-      return new Set([key]);
+      return next;
     });
   }, []);
 
   const selectRange = useCallback((key: string, orderedKeys: string[]) => {
+    setAnchorKey(key);
     setSelectedKeys(prev => {
+      const next = new Set(prev);
+      const isCurrentlySelected = next.has(key);
+      const shouldSelect = !isCurrentlySelected;
+
       if (!anchorKey) {
-        setAnchorKey(key);
-        return new Set([key]);
+        if (shouldSelect) {
+          next.add(key);
+        } else {
+          next.delete(key);
+        }
+        return next;
       }
       const anchorIdx = orderedKeys.indexOf(anchorKey);
       const targetIdx = orderedKeys.indexOf(key);
       if (anchorIdx === -1 || targetIdx === -1) {
-        setAnchorKey(key);
-        return new Set([key]);
+        if (shouldSelect) {
+          next.add(key);
+        } else {
+          next.delete(key);
+        }
+        return next;
       }
       const start = Math.min(anchorIdx, targetIdx);
       const end = Math.max(anchorIdx, targetIdx);
-      const newSelection = new Set<string>();
       for (let i = start; i <= end; i++) {
-        newSelection.add(orderedKeys[i]);
+        if (shouldSelect) {
+          next.add(orderedKeys[i]);
+        } else {
+          next.delete(orderedKeys[i]);
+        }
       }
-      setAnchorKey(key);
-      return newSelection;
+      return next;
     });
   }, [anchorKey]);
 
