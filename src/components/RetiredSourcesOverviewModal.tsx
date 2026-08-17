@@ -449,13 +449,14 @@ export function RetiredSourcesOverviewModal({
           e.stopPropagation();
           togglePin(colId);
         }}
-        className={`p-0 m-0 ml-1 bg-transparent border-0 cursor-pointer transition-opacity ${isPinned ? 'opacity-100 hover:opacity-80' : 'opacity-40 hover:opacity-100 grayscale-[0.5]'}`}
+        className={`shrink-0 p-0 m-0 ml-1 bg-transparent border-0 cursor-pointer transition-opacity ${isPinned ? 'opacity-100 hover:opacity-80' : 'opacity-40 hover:opacity-100 grayscale-[0.5]'}`}
         title={isPinned ? "Unpin column (unfreeze)" : "Pin column (freeze)"}
       >
         📌
       </button>
     );
   };
+
   const getHeaderCls = (colId: string, baseClass: string) => {
     const isPinned = pinnedCols.includes(colId);
     const isLastPinned = isPinned && lastPinnedColId === colId;
@@ -465,7 +466,7 @@ export function RetiredSourcesOverviewModal({
       else if (colId === '__total_sales' || colId === '__range_sum') pinnedBg = '!bg-blue-100';
       else pinnedBg = '!bg-gray-200';
     }
-    return `${baseClass} ${isPinned ? 'sticky z-20 ' + pinnedBg : ''} ${isLastPinned ? 'shadow-[4px_0_10px_-4px_rgba(0,0,0,0.15)] border-r-gray-400' : ''}`;
+    return `${baseClass} overflow-hidden ${isPinned ? 'sticky z-20 ' + pinnedBg : ''} ${isLastPinned ? 'shadow-[4px_0_10px_-4px_rgba(0,0,0,0.15)] border-r-gray-400' : ''}`;
   };
   const getHeaderSty = (colId: string, width: number) => {
     const isPinned = pinnedCols.includes(colId);
@@ -698,22 +699,22 @@ export function RetiredSourcesOverviewModal({
             <thead className="sticky top-0 bg-gray-100 z-10 shadow-sm">
               <tr>
                 <th className={getHeaderCls('__retired_source', "p-2 border text-left bg-purple-50 text-purple-800 relative")} style={getHeaderSty('__retired_source', getColWidth('__retired_source'))}>
-                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">📦 {showAllStatuses ? "Retired/Active Sources" : "Retired Source"}</div>{renderPinBtn('__retired_source')}</div>
+                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">📦 {showAllStatuses ? "Retired/Active Sources" : "Retired Source"}</div>{renderPinBtn('__retired_source')}</div>
                   <div onMouseDown={(e) => startResize(e, "__retired_source")} onDoubleClick={() => resetCol("__retired_source")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                 </th>
                 <th className={getHeaderCls('__total_sales', "p-2 border text-left bg-blue-50 text-blue-800 relative")} style={getHeaderSty('__total_sales', getColWidth('__total_sales'))}>
-                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">📈 Total Sales</div>{renderPinBtn('__total_sales')}</div>
+                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">📈 Total Sales</div>{renderPinBtn('__total_sales')}</div>
                   <div onMouseDown={(e) => startResize(e, "__total_sales")} onDoubleClick={() => resetCol("__total_sales")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                 </th>
                 <th className={getHeaderCls('__range_sum', "p-2 border text-left bg-blue-50 text-blue-800 relative")} style={getHeaderSty('__range_sum', getColWidth('__range_sum'))}>
-                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">Total Sale Range Column Sum</div>{renderPinBtn('__range_sum')}</div>
+                  <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">Total Sale Range Column Sum</div>{renderPinBtn('__range_sum')}</div>
                   <div onMouseDown={(e) => startResize(e, "__range_sum")} onDoubleClick={() => resetCol("__range_sum")} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
                 </th>
                 {sourceColumns.map((c, i) => {
                   const isUncheckedSaleCol = c.type === 'sale_tracker' && !selectedKeys.has(c.key);
                   return (
                   <th key={c.key} className={getHeaderCls(c.key, "p-2 border text-left relative")} style={getHeaderSty(c.key, getColWidth(c.key))}>
-                    <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">
+                    <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1 min-w-0">
                       {c.type === 'sale_tracker' && (
                         <span className={`relative inline-flex items-center justify-center w-7 h-7 rounded-full shrink-0 transition-colors cursor-pointer hover:bg-gray-300 mr-1 ${selectedKeys.has(c.key) ? 'bg-blue-100' : ''} ${c.key === anchorKey ? 'ring-2 ring-purple-500' : ''}`}>
                           <input
@@ -732,7 +733,7 @@ export function RetiredSourcesOverviewModal({
                           />
                         </span>
                       )}
-                      <span className={isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5]' : ''}>
+                      <span className={`${isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5] ' : ''}truncate`}>
                         {i + 1}. {(() => {
                           if (c.type !== 'sale_tracker' || saleEffectiveTerms.length === 0) return c.name;
                           const escapedTerms = saleEffectiveTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
