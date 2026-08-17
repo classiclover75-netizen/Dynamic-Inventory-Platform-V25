@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Search } from 'lucide-react';
 import { Input, Button } from './ui';
 import { MultiSourceItem } from '../lib/sourceArchiveUtils';
+import { getCreationTooltip } from '../lib/sourceTimestamp';
 
 export function RetiredSourcePickerPopup({
   retiredSources,
@@ -88,7 +89,7 @@ export function RetiredSourcePickerPopup({
           <div className="p-2 text-center text-xs text-gray-500">No sources found.</div>
         ) : (
           filteredSources.map(s => (
-            <label key={s.source} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 cursor-pointer rounded">
+            <label key={s.source} title={getCreationTooltip(s)} className="flex items-center gap-2 px-2 py-1.5 hover:bg-gray-100 cursor-pointer rounded">
               <input
                 type="checkbox"
                 checked={selected.has(s.source)}

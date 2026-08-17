@@ -13,6 +13,7 @@ import { ArchivedSaleSourceAdder } from './ArchivedSaleSourceAdder';
 import { getInlineRetiredSourceNames } from '../lib/inlineRetiredHelper';
 import { isLocked, toggleLockInTotalQty } from '../lib/sourceLockUtils';
 import { resolveChipRender, resolveBorderAccent } from '../lib/colorRender';
+import { getCreationTooltip } from '../lib/sourceTimestamp';
 
 export const TableView = ({
   activeFilterSaleCol,
@@ -937,6 +938,7 @@ export const TableView = ({
                                                 return (
                                                   <div
                                                     key={idx}
+                                                    title={getCreationTooltip(s)}
                                                     onClick={(e) => {
                                                       e.stopPropagation();
                                                       if (onOpenActiveSourceOverview) onOpenActiveSourceOverview([s.source]);
@@ -977,6 +979,7 @@ export const TableView = ({
                                                 return (
                                                   <div
                                                     key={`inline-ret-${idx}`}
+                                                    title={getCreationTooltip(s)}
                                                     onClick={(e) => {
                                                       e.stopPropagation();
                                                       if (onOpenRetiredOverview) onOpenRetiredOverview([s.source]);
