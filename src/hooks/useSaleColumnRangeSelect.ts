@@ -60,5 +60,10 @@ export function useSaleColumnRangeSelect() {
     setAnchorKey(null);
   }, []);
 
-  return { selectedKeys, toggle, selectRange, clear, anchorKey };
+  const selectAll = useCallback((keys: string[]) => {
+    setSelectedKeys(new Set(keys));
+    setAnchorKey(null);
+  }, []);
+
+  return { selectedKeys, toggle, selectRange, clear, selectAll, anchorKey };
 }

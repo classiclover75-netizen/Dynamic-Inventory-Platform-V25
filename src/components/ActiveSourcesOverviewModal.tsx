@@ -59,8 +59,14 @@ export function ActiveSourcesOverviewModal({
   const saleCols = useMemo(() => columns.filter((c: any) => c.type === "sale_tracker"), [columns]);
   const [showSaleColumns, setShowSaleColumns] = useState(true);
 
-  const { selectedKeys, toggle, selectRange, clear, anchorKey } = useSaleColumnRangeSelect();
+  const { selectedKeys, toggle, selectRange, clear, selectAll, anchorKey } = useSaleColumnRangeSelect();
   const orderedSaleColKeys = useMemo(() => saleCols.map((c: any) => c.key), [saleCols]);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      selectAll(orderedSaleColKeys);
+    }
+  }, [isOpen, selectAll, orderedSaleColKeys]);
 
   const {
     searchText: saleSearchText,
