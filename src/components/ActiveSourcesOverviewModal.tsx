@@ -599,18 +599,25 @@ export function ActiveSourcesOverviewModal({
                 Show Sale Columns
              </label>
              {showSaleColumns && (
-               <div className="relative shrink-0">
-                 <Search className="absolute left-2 top-2.5 text-gray-400" size={16} />
-                 <input
-                   type="text"
-                   className="pl-8 pr-3 py-1.5 border border-gray-300 rounded-md text-sm outline-none focus:border-blue-500 w-64"
-                   placeholder="Search or press enter to save"
-                   value={saleSearchText}
-                   onChange={e => setSaleSearchText(e.target.value)}
-                   onKeyDown={e => {
-                     if (e.key === 'Enter') saveSaleTerm();
-                   }}
-                 />
+               <div className="flex items-center gap-2">
+                 <div className="relative shrink-0">
+                   <Search className="absolute left-2 top-2.5 text-gray-400" size={16} />
+                   <input
+                     type="text"
+                     className="pl-8 pr-3 py-1.5 border border-gray-300 rounded-md text-sm outline-none focus:border-blue-500 w-64"
+                     placeholder="Search or press enter to save"
+                     value={saleSearchText}
+                     onChange={e => setSaleSearchText(e.target.value)}
+                     onKeyDown={e => {
+                       if (e.key === 'Enter') saveSaleTerm();
+                     }}
+                   />
+                 </div>
+                 {saleEffectiveTerms.length > 0 && (
+                   <div className="px-2.5 py-0.5 text-xs text-gray-500 bg-gray-100 rounded-full whitespace-nowrap">
+                     {sourceColumns.filter((c: any) => c.type === 'sale_tracker').length}/{saleCols.length} sale columns
+                   </div>
+                 )}
                </div>
              )}
            </div>
