@@ -603,7 +603,7 @@ export function ActiveSourcesOverviewModal({
                  <option value="Remaining Qty">Remaining Qty</option>
                  {saleCols.map((c: any) => <option key={c.key} value={c.name}>{c.name}</option>)}
                </select>
-               <button onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')} className="px-2 py-1 rounded hover:bg-gray-100 text-gray-600 font-medium border border-gray-200" title={sortDir === 'asc' ? 'Ascending' : 'Descending'}>
+               <button onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')} className="px-2 py-1 rounded font-medium border bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200" title={sortDir === 'asc' ? 'Ascending' : 'Descending'}>
                  {sortDir === 'asc' ? '↑' : '↓'}
                </button>
              </div>
