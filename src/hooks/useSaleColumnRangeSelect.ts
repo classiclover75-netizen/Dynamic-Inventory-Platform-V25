@@ -60,5 +60,5 @@ export function useSaleColumnRangeSelect() {
     setAnchorKey(null);
   }, []);
 
-  return { selectedKeys, toggle, selectRange, clear };
+  return { selectedKeys, toggle, selectRange, clear, anchorKey };
 }

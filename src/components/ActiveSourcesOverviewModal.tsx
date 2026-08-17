@@ -58,7 +58,7 @@ export function ActiveSourcesOverviewModal({
   const saleCols = useMemo(() => columns.filter((c: any) => c.type === "sale_tracker"), [columns]);
   const [showSaleColumns, setShowSaleColumns] = useState(true);
 
-  const { selectedKeys, toggle, selectRange, clear } = useSaleColumnRangeSelect();
+  const { selectedKeys, toggle, selectRange, clear, anchorKey } = useSaleColumnRangeSelect();
   const orderedSaleColKeys = useMemo(() => saleCols.map((c: any) => c.key), [saleCols]);
 
   const [colWidths, setColWidths] = useState<Record<string, number>>(initialColWidths);
@@ -645,7 +645,7 @@ export function ActiveSourcesOverviewModal({
                   <th key={c.key} className={getHeaderCls(c.key, "p-2 border text-left relative")} style={getHeaderSty(c.key, getColWidth(c.key))}>
                     <div className="flex items-center justify-between w-full"><div className="flex items-center gap-1">
                       {c.type === 'sale_tracker' && (
-                        <span className={`relative inline-flex items-center justify-center w-7 h-7 rounded-full shrink-0 transition-colors cursor-pointer hover:bg-gray-300 mr-1 ${selectedKeys.has(c.key) ? 'bg-blue-100' : ''}`}>
+                        <span className={`relative inline-flex items-center justify-center w-7 h-7 rounded-full shrink-0 transition-colors cursor-pointer hover:bg-gray-300 mr-1 ${selectedKeys.has(c.key) ? 'bg-blue-100' : ''} ${c.key === anchorKey ? 'ring-2 ring-purple-500' : ''}`}>
                           <input
                             type="checkbox"
                             className="accent-blue-600 w-4 h-4 cursor-pointer focus:outline-none focus-visible:outline-none"
