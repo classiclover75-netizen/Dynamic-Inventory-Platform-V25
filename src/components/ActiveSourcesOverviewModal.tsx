@@ -10,6 +10,7 @@ import { sortOverviewRows, getStatusCounts, buildMixedFlatRows, getSourceNumeric
 import { resolveChipRender } from '../lib/colorRender';
 import { useOverviewColumnPin } from '../hooks/useOverviewColumnPin';
 import { useSaleColumnRangeSelect } from '../hooks/useSaleColumnRangeSelect';
+import { useSaleColumnSearch } from '../hooks/useSaleColumnSearch';
 import { Modal, Button, Input } from './ui';
 import { useToast } from './ToastProvider';
 
@@ -60,6 +61,20 @@ export function ActiveSourcesOverviewModal({
 
   const { selectedKeys, toggle, selectRange, clear, anchorKey } = useSaleColumnRangeSelect();
   const orderedSaleColKeys = useMemo(() => saleCols.map((c: any) => c.key), [saleCols]);
+
+  const {
+    searchText: saleSearchText,
+    setSearchText: setSaleSearchText,
+    savedTerms: saleSavedTerms,
+    activeTerms: saleActiveTerms,
+    effectiveTerms: saleEffectiveTerms,
+    saveTerm: saveSaleTerm,
+    toggleTerm: toggleSaleTerm,
+    removeTerm: removeSaleTerm,
+    selectAll: selectAllSaleTerms,
+    selectNone: selectNoneSaleTerms,
+    clearAll: clearAllSaleTerms
+  } = useSaleColumnSearch();
 
   const [colWidths, setColWidths] = useState<Record<string, number>>(initialColWidths);
   const colWidthsRef = React.useRef(colWidths);
@@ -275,9 +290,11 @@ export function ActiveSourcesOverviewModal({
     let cols = columns.filter(c => c.key !== 'sr');
     if (!showSaleColumns) {
       cols = cols.filter(c => c.type !== 'sale_tracker');
+    } else if (saleEffectiveTerms.length > 0) {
+      cols = cols.filter(c => c.type !== 'sale_tracker' || saleEffectiveTerms.some(term => c.name.toLowerCase().includes(term)));
     }
     return cols;
-  }, [columns, showSaleColumns]);
+  }, [columns, showSaleColumns, saleEffectiveTerms]);
 
   const filteredRows = useMemo(() => {
     const baseRows = flatRows.filter(r => selectedSources.has(r._activeSourceName));
@@ -575,6 +592,21 @@ export function ActiveSourcesOverviewModal({
                 />
                 Show Sale Columns
              </label>
+             {showSaleColumns && (
+               <div className="relative shrink-0">
+                 <Search className="absolute left-2 top-2.5 text-gray-400" size={16} />
+                 <input
+                   type="text"
+                   className="pl-8 pr-3 py-1.5 border border-gray-300 rounded-md text-sm outline-none focus:border-blue-500 w-64"
+                   placeholder="Search or press enter to save"
+                   value={saleSearchText}
+                   onChange={e => setSaleSearchText(e.target.value)}
+                   onKeyDown={e => {
+                     if (e.key === 'Enter') saveSaleTerm();
+                   }}
+                 />
+               </div>
+             )}
            </div>
            <div className="flex items-center gap-2 shrink-0">
              <Button
@@ -603,12 +635,37 @@ export function ActiveSourcesOverviewModal({
                  <option value="Remaining Qty">Remaining Qty</option>
                  {saleCols.map((c: any) => <option key={c.key} value={c.name}>{c.name}</option>)}
                </select>
-               <button onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')} className="px-2 py-1 rounded font-medium border bg-blue-50 hover:bg-blue-100 text-blue-600 border-blue-200" title={sortDir === 'asc' ? 'Ascending' : 'Descending'}>
+               <button onClick={() => setSortDir(d => d === 'asc' ? 'desc' : 'asc')} className="px-2 py-1 rounded font-medium border bg-blue-100 hover:bg-blue-200 text-blue-900 border-blue-300" title={sortDir === 'asc' ? 'Ascending' : 'Descending'}>
                  {sortDir === 'asc' ? '↑' : '↓'}
                </button>
              </div>
            </div>
         </div>
+        {showSaleColumns && saleSavedTerms.length > 0 && (
+          <div className="flex flex-col gap-2 mb-2 shrink-0">
+            <div className="flex flex-wrap items-center gap-2">
+              {saleSavedTerms.map((term, idx) => {
+                const isActive = saleActiveTerms.has(term);
+                return (
+                  <div key={`${term}-${idx}`} className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold border cursor-pointer select-none ${isActive ? 'bg-blue-900 text-white border-blue-900' : 'bg-blue-50 text-blue-900 border-blue-300'}`} onClick={(e) => toggleSaleTerm(term, idx, e.shiftKey)}>
+                    <span>{term}</span>
+                    <button onClick={(e) => { e.stopPropagation(); removeSaleTerm(term); }} className={`ml-1 flex items-center justify-center rounded-full w-4 h-4 hover:bg-black/20 ${isActive ? 'text-white' : 'text-blue-900'}`}>
+                      <span className="text-[10px] leading-none mb-[1px]">✕</span>
+                    </button>
+                  </div>
+                );
+              })}
+              <div className="flex items-center gap-2 ml-2">
+                <button onClick={selectAllSaleTerms} className="text-xs font-medium text-blue-600 hover:underline">Select all</button>
+                <span className="text-gray-300">|</span>
+                <button onClick={selectNoneSaleTerms} className="text-xs font-medium text-gray-500 hover:underline">Select none</button>
+                <span className="text-gray-300">|</span>
+                <button onClick={clearAllSaleTerms} className="text-xs font-medium text-red-500 hover:underline">Clear all</button>
+                <span className="text-xs text-gray-400 ml-2 italic">Click to toggle. Shift+click to select or deselect a range.</span>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="mb-2">
            <div className="relative w-full border-[2px] border-[#217346] rounded bg-white">
              <Search
@@ -663,7 +720,19 @@ export function ActiveSourcesOverviewModal({
                         </span>
                       )}
                       <span className={isUncheckedSaleCol ? 'opacity-40 grayscale-[0.5]' : ''}>
-                        {i + 1}. {c.name} {c.locked && "🔒"}
+                        {i + 1}. {(() => {
+                          if (c.type !== 'sale_tracker' || saleEffectiveTerms.length === 0) return c.name;
+                          const escapedTerms = saleEffectiveTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+                          const regex = new RegExp(`(${escapedTerms.join('|')})`, 'gi');
+                          const parts = String(c.name).split(regex);
+                          return parts.map((part, pIdx) => {
+                            const isMatch = saleEffectiveTerms.some(t => t.toLowerCase() === part.toLowerCase());
+                            if (isMatch) {
+                              return <mark key={pIdx} className="bg-amber-200 text-amber-900 px-[1px] rounded-sm">{part}</mark>;
+                            }
+                            return <span key={pIdx}>{part}</span>;
+                          });
+                        })()} {c.locked && "🔒"}
                       </span>
                     </div>{renderPinBtn(c.key)}</div>
                     <div onMouseDown={(e) => startResize(e, c.key)} onDoubleClick={() => resetCol(c.key)} className="absolute top-0 right-0 h-full w-1.5 cursor-col-resize select-none hover:bg-blue-400/60" />
@@ -700,7 +769,9 @@ export function ActiveSourcesOverviewModal({
                       if (selectedKeys.size === 0) return "0";
                       let sum = 0;
                       selectedKeys.forEach(key => {
-                        sum += getSourceNumericValue(row, key, row._activeSourceName, false, columns);
+                        if (sourceColumns.some((c: any) => c.key === key)) {
+                          sum += getSourceNumericValue(row, key, row._activeSourceName, false, columns);
+                        }
                       });
                       return highlightText(String(sum), deferredSearchQuery);
                     })()}
